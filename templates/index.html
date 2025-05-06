@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Classification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .upload-container {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        #audioPlayer {
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Classification</h1>
+    <p>Upload an audio file to classify it</p>
+    
+    <div class="upload-container">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="audioFile" name="audio_file" accept="audio/*" required>
+            <button type="submit">Classify</button>
+        </form>
+    </div>
+    
+    <div id="result">
+        <h3>Prediction: <span id="predictionText"></span></h3>
+        <audio id="audioPlayer" controls>
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('audioFile');
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select an audio file');
+                return;
+            }
+            
+            formData.append('audio_file', fileInput.files[0]);
+            
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('predictionText').textContent = data.prediction;
+                    document.getElementById('audioPlayer').src = data.audio_file;
+                    document.getElementById('result').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during classification');
+            });
+        });
+    </script>
+</body>
+</html>
